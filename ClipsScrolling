@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DuckClips Dashboard</title>
+
+<style>
+body { margin:0; font-family:Arial; background:#0f172a; color:#e2e8f0; }
+
+.container { display:flex; }
+
+.sidebar {
+  width:200px;
+  background:#1e293b;
+  height:100vh;
+  padding:20px;
+}
+
+.sidebar a {
+  display:block;
+  padding:10px;
+  margin:10px 0;
+  color:#e2e8f0;
+  text-decoration:none;
+}
+
+.main {
+  flex:1;
+  padding:20px;
+}
+
+.card {
+  background:#1e293b;
+  padding:20px;
+  margin-bottom:20px;
+  border-radius:12px;
+}
+
+input {
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:6px;
+}
+
+button {
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#38bdf8;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.feed {
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+.video-card {
+  background:#000;
+  border-radius:12px;
+  overflow:hidden;
+  position:relative;
+}
+
+.video-card iframe {
+  width:100%;
+  height:300px;
+}
+
+.actions {
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.actions button {
+  background:#fff;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="sidebar">
+  <h2>🦆 DuckClips</h2>
+  <a href="#upload">Upload</a>
+  <a href="#feed">Feed</a>
+</div>
+
+<div class="main">
+
+<div id="upload" class="card">
+  <h2>🎬 Upload Clip</h2>
+  <input id="title" placeholder="Clip Title">
+  <input id="url" placeholder="YouTube Embed URL (IMPORTANT)">
+  <button onclick="addClip()">Post Clip</button>
+</div>
+
+<div id="feed" class="feed"></div>
+
+</div>
+
+</div>
+
+<script>
+let clips = JSON.parse(localStorage.getItem('clips')) || [];
+
+function renderClips() {
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '';
+
+  clips.forEach((clip, index) => {
+    const div = document.createElement('div');
+    div.className = 'video-card';
+
+    div.innerHTML = `
+      <iframe src="${clip.url}" frameborder="0" allowfullscreen></iframe>
+      <div class="actions">
+        <button onclick="likeClip(${index})">❤️ ${clip.likes}</button>
+        <button onclick="deleteClip(${index})">🗑️</button>
+      </div>
+    `;
+
+    feed.appendChild(div);
+  });
+}
+
+function addClip() {
+  const title = document.getElementById('title').value;
+  const url = document.getElementById('url').value;
+
+  if (!url.includes('embed')) {
+    alert('Use a YouTube EMBED link!');
+    return;
+  }
+
+  clips.push({ title, url, likes: 0 });
+  localStorage.setItem('clips', JSON.stringify(clips));
+
+  renderClips();
+}
+
+function likeClip(i) {
+  clips[i].likes++;
+  localStorage.setItem('clips', JSON.stringify(clips));
+  renderClips();
+}
+
+function deleteClip(i) {
+  clips.splice(i, 1);
+  localStorage.setItem('clips', JSON.stringify(clips));
+  renderClips();
+}
+
+renderClips();
+</script>
+
+</body>
+</html>
