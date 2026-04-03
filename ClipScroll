@@ -1,0 +1,54 @@
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+const SUPABASE_URL = "https://yivpxonkplynzvcuxvgk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wBCwGnaqjYg82yCyF__Utw_sQL2iCKc";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function renderClips() {
+  const { data } = await supabase.from('clips').select('*');
+
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '';
+
+  data.forEach(clip => {
+    const div = document.createElement('div');
+    div.className = 'video-card';
+
+    div.innerHTML = `
+      <iframe src="${clip.url}" frameborder="0" allowfullscreen></iframe>
+      <div class="actions">
+        <button onclick="likeClip(${clip.id}, ${clip.likes})">❤️ ${clip.likes}</button>
+        <button onclick="deleteClip(${clip.id})">🗑️</button>
+      </div>
+    `;
+
+    feed.appendChild(div);
+  });
+}
+
+async function addClip() {
+  const title = document.getElementById('title').value;
+  const url = document.getElementById('url').value;
+
+  if (!url.includes('embed')) {
+    alert('Use a YouTube EMBED link!');
+    return;
+  }
+
+  await supabase.from('clips').insert([{ title, url, likes: 0 }]);
+  renderClips();
+}
+
+async function likeClip(id, likes) {
+  await supabase.from('clips').update({ likes: likes + 1 }).eq('id', id);
+  renderClips();
+}
+
+async function deleteClip(id) {
+  await supabase.from('clips').delete().eq('id', id);
+  renderClips();
+}
+
+renderClips();
+</script>
